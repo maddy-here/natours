@@ -1,29 +1,29 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 mongoose
   .connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("DB connected succesfully"));
+  .then(() => console.log('DB connected succesfully'));
 
 const tourSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: [true, "name must be unique"],
+    unique: [true, 'name must be unique'],
   },
   duration: {
     required: true,
     type: Number,
   },
   maxGroupSize: {
-    required: [true, "max grooup size is required"],
+    required: [true, 'max grooup size is required'],
     type: Number,
   },
   difficulty: {
     type: String,
-    required: [true, "difficulty is required"],
+    required: [true, 'difficulty is required'],
   },
   ratingsAverage: {
     type: Number,
@@ -35,7 +35,7 @@ const tourSchema = mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, "price is required"],
+    required: [true, 'price is required'],
   },
   priceDiscount: Number,
   summary: {
@@ -59,5 +59,5 @@ const tourSchema = mongoose.Schema({
   startDates: [Date],
 });
 
-const Tour = mongoose.model("Tour", tourSchema);
+const Tour = mongoose.model('Tour', tourSchema);
 module.exports = Tour;
