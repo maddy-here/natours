@@ -9,28 +9,19 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 
-// TODO: some todos
-
-// FIXME: some fixes
-
-// NOTE: some notes
-
-// BUG: some bugs
-
-//  somestuff
-// Home Page Endpoints
-app.get('/', (req, res) => {
-  res.send({
-    message: 'this is home page',
-  });
-});
-
 app.post('/', (req, res) => {
   res.json({ message: `You can post on this endpoint` });
 });
 
 app.use('/api/v1/tours', tourRoute);
 app.use('/api/v1/user', userRoute);
-// routes
+
+// handle undefined routes
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Route ${req.originalUrl} don't exists on server`,
+  });
+});
 
 module.exports = app;
