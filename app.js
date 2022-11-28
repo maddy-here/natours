@@ -8,7 +8,11 @@ const userRoute = require('./routes/userRoute');
 
 const app = express();
 
-app.use(morgan('dev'));
+const isDevEnv = process.env.NODE_ENV === 'development';
+if (isDevEnv) {
+  app.use(morgan('dev'));
+}
+
 app.use(express.json());
 
 app.post('/', (req, res) => {
