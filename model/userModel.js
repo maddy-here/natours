@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// schema hook/middleware
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
@@ -42,6 +43,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// schema instanse methods
 userSchema.methods.isCorrect = async function (incomingPass, existingPass) {
   return await bcrypt.compare(incomingPass, existingPass);
 };
