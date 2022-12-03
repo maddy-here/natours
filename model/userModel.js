@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
+  },
   password: {
     type: String,
     required: [true, 'Plaese enter password'],
@@ -33,6 +38,7 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords do not match',
     },
   },
+  passwordChangedAt: Date,
 });
 
 // schema hook/middleware
@@ -46,6 +52,17 @@ userSchema.pre('save', async function (next) {
 // schema instanse methods
 userSchema.methods.isCorrect = async function (incomingPass, existingPass) {
   return await bcrypt.compare(incomingPass, existingPass);
+};
+
+userSchema.methods.hasSamePasswordSince = function (JWTTimeStamp) {
+  if (this.passwordChangedAt) {
+    const changedPasswordTimeStamp = parseInt(
+      this.passwordChangedAt.getTime(),
+      10,
+    );
+    return JWTTimeStamp < changedPasswordTimeStamp;
+  }
+  return false;
 };
 
 const userModel = mongoose.model('User', userSchema);

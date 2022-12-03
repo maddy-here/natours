@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const userModel = require('../model/userModel');
 const AppError = require('../utils/appError');
@@ -52,3 +53,49 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
   });
 });
+
+exports.protect = async (req, res, next) => {
+  let token = null;
+  //1 check if token exists
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token)
+    return next(new AppError('No token existed for the request', 401));
+
+  //2 check if token is not modified, before requesting back
+  const payload = await promisify(jwt.verify)(
+    token,
+    process.env.JWT_SECRET_KEY,
+  );
+
+  //3 check if user exists for the credentials that are sent from browser
+  const freshUser = await userModel.findById(payload.id);
+  if (!freshUser)
+    return next(
+      new AppError(
+        'User belongin to this token does not exists, kindly login again',
+        401,
+      ),
+    );
+
+  //4 check if the password has not been modified before the token was generated
+  if (freshUser.hasSamePasswordSince(payload.iat))
+    return next(
+      new AppError('Passowrd has been changed, login again to get access', 401),
+    );
+  req.user = freshUser; // further use...
+  next();
+};
+
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      next(new AppError('User Do not Have permisions to delete', 403));
+    }
+    next();
+  };

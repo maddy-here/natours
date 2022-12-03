@@ -37,6 +37,9 @@ const handleDuplicateKeyErrorDB = (error) => {
   return new AppError(message, statusCode);
 };
 
+const handleJsonWebTokenError = () =>
+  new AppError('token has been modified, please check your token again', 401);
+
 module.exports = (error, request, response, next) => {
   error.statusCode = error.statusCode || 500;
   error.status = error.status || 'error';
@@ -60,6 +63,8 @@ module.exports = (error, request, response, next) => {
     if (errorCopy.code === 11000) {
       errorCopy = handleDuplicateKeyErrorDB(errorCopy);
     }
+    if (errorCopy.name === 'JsonWebTokenError')
+      errorCopy = handleJsonWebTokenError();
 
     prodErrorHandler(errorCopy, response);
   }
